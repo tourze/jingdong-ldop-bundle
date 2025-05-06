@@ -1,5 +1,5 @@
 {
-  "name": "extra/jingdong-ldop-bundle",
+  "name": "tourze/jingdong-ldop-bundle",
   "description": "京东物流",
   "type": "symfony-bundle",
   "require": {
