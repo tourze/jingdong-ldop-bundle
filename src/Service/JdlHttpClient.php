@@ -101,7 +101,7 @@ class JdlHttpClient
     /**
      * 获取访问令牌
      */
-    private function getAccessToken(): string
+    protected function getAccessToken(): string
     {
         $token = $this->tokenRepository->find(1);
         if (empty($token)) {

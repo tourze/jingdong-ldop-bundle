@@ -33,5 +33,10 @@
     "psr-4": {
       "JingdongLdopBundle\\": "src"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "JingdongLdopBundle\\Tests\\": "tests"
+    }
   }
 }
