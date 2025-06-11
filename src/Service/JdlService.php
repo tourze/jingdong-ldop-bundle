@@ -80,7 +80,7 @@ class JdlService
             }
 
             return $result;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new \Exception('创建取件订单失败: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
@@ -120,7 +120,7 @@ class JdlService
             }
 
             return $result;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new \Exception('取消取件订单失败: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
@@ -191,7 +191,7 @@ class JdlService
             }
 
             return $logisticsDetails;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new \Exception('获取物流信息失败: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
