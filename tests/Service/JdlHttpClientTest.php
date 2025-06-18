@@ -83,7 +83,6 @@ class JdlHttpClientTest extends TestCase
         $sign = $reflectionMethod->invoke($this->httpClient, $params, 'test_app_secret');
         
         // 验证签名是大写的MD5值
-        $this->assertIsString($sign);
         $this->assertEquals(32, strlen($sign));
         $this->assertEquals(strtoupper($sign), $sign);
     }
@@ -145,8 +144,6 @@ class JdlHttpClientTest extends TestCase
             ->willReturn($responseMock);
             
         $result = $this->httpClient->request('test.method', ['param1' => 'value1']);
-        
-        $this->assertIsArray($result);
         $this->assertEquals(['test_key' => 'test_value'], $result);
     }
     
@@ -167,8 +164,6 @@ class JdlHttpClientTest extends TestCase
             ->willReturn($responseMock);
             
         $result = $this->httpClient->request('test.method', ['param1' => 'value1']);
-        
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('error_response', $result);
         $this->assertEquals('19', $result['error_response']['code']);
     }

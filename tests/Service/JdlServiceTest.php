@@ -101,8 +101,6 @@ class JdlServiceTest extends TestCase
             ->method('flush');
             
         $result = $this->jdlService->createPickupOrder($pickupOrder);
-        
-        $this->assertIsArray($result);
         $this->assertEquals('100', $result['code']);
         $this->assertEquals('JD12345678', $result['pickUpCode']);
     }
@@ -184,8 +182,6 @@ class JdlServiceTest extends TestCase
             ->method('flush');
             
         $result = $this->jdlService->cancelPickupOrder($pickupOrder);
-        
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('returnType', $result);
         $this->assertEquals(0, $result['returnType']['statusCode']);
     }
@@ -255,8 +251,6 @@ class JdlServiceTest extends TestCase
             ->willReturn(null);
             
         $result = $this->jdlService->getLogisticsTrace('JD12345678', $pickupOrder);
-        
-        $this->assertIsArray($result);
         $this->assertCount(2, $result);
         $this->assertContainsOnlyInstancesOf(LogisticsDetail::class, $result);
         $this->assertEquals('JD12345678', $result[0]->getWaybillCode());
@@ -306,8 +300,6 @@ class JdlServiceTest extends TestCase
             });
             
         $result = $this->jdlService->getLogisticsTrace('JD12345678', $pickupOrder);
-        
-        $this->assertIsArray($result);
         $this->assertCount(1, $result);
         $this->assertEquals('运输中', $result[0]->getOperateRemark());
     }
@@ -352,8 +344,6 @@ class JdlServiceTest extends TestCase
             ->willReturn($emptyResponse);
             
         $result = $this->jdlService->getLogisticsTrace('JD12345678', $pickupOrder);
-        
-        $this->assertIsArray($result);
         $this->assertEmpty($result);
     }
     

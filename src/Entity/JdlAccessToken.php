@@ -7,9 +7,6 @@ use Doctrine\ORM\Mapping as ORM;
 use JingdongLdopBundle\Repository\JdlAccessTokenRepository;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
 
 #[ORM\Entity(repositoryClass: JdlAccessTokenRepository::class)]
 #[ORM\Table(name: 'jdl_access_token')]
@@ -17,24 +14,18 @@ class JdlAccessToken
 {
     use TimestampableAware;
 
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
     private ?string $id = null;
 
-    #[ListColumn]
     #[ORM\Column(type: 'string', length: 32, options: ['comment' => 'access_token'])]
     private string $accessToken;
 
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(type: 'string', length: 32, options: ['comment' => 'refresh_token'])]
     private string $refreshToken;
 
-    #[FormField]
     #[ORM\Column(type: 'string', length: 64, nullable: true)]
     private ?string $scope = '';
 
