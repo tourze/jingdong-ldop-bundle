@@ -105,14 +105,14 @@ class JdlConfigTest extends TestCase
     
     public function testGetSetCreateTime()
     {
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->jdlConfig->setCreateTime($now);
         $this->assertSame($now, $this->jdlConfig->getCreateTime());
     }
     
     public function testGetSetUpdateTime()
     {
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->jdlConfig->setUpdateTime($now);
         $this->assertSame($now, $this->jdlConfig->getUpdateTime());
     }

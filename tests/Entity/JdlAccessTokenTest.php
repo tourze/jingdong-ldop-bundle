@@ -50,14 +50,14 @@ class JdlAccessTokenTest extends TestCase
     
     public function testGetSetCreateTime()
     {
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->accessToken->setCreateTime($now);
         $this->assertSame($now, $this->accessToken->getCreateTime());
     }
     
     public function testGetSetUpdateTime()
     {
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->accessToken->setUpdateTime($now);
         $this->assertSame($now, $this->accessToken->getUpdateTime());
     }
