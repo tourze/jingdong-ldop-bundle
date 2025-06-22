@@ -220,12 +220,12 @@ class PickupOrderTest extends TestCase
     public function testGetSetPickupTime()
     {
         // 测试取件开始时间
-        $startTime = new \DateTime('2023-01-01 10:00:00');
+        $startTime = new \DateTimeImmutable('2023-01-01 10:00:00');
         $this->pickupOrder->setPickupStartTime($startTime);
         $this->assertSame($startTime, $this->pickupOrder->getPickupStartTime());
 
         // 测试取件结束时间
-        $endTime = new \DateTime('2023-01-01 12:00:00');
+        $endTime = new \DateTimeImmutable('2023-01-01 12:00:00');
         $this->pickupOrder->setPickupEndTime($endTime);
         $this->assertSame($endTime, $this->pickupOrder->getPickupEndTime());
 

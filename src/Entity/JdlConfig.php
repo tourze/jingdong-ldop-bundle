@@ -9,15 +9,15 @@ use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
 #[ORM\Entity(repositoryClass: JdlConfigRepository::class)]
-#[ORM\Table(name: 'jdl_config')]
+#[ORM\Table(name: 'jdl_config', options: ['comment' => '京东物流配置表'])]
 #[ORM\UniqueConstraint(name: 'uniq_customer_code', columns: ['customer_code'])]
-class JdlConfig
+class JdlConfig implements \Stringable
 {
     use TimestampableAware;
+    use BlameableAware;
 
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
@@ -25,44 +25,37 @@ class JdlConfig
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
     private ?string $id = null;
 
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     #[IndexColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
     private ?bool $valid = false;
 
-    #[ORM\Column(type: 'string', length: 32, options: ['comment' => '商家编码'])]
+    #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => '商家编码'])]
     private string $customerCode;    // 商家编码
 
-    #[ORM\Column(type: 'string', length: 32, options: ['comment' => '京东应用的AppKey'])]
+    #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => '京东应用的AppKey'])]
     private string $appKey;         // 应用Key
 
-    #[ORM\Column(type: 'string', length: 64, options: ['comment' => '京东应用的AppSecret'])]
+    #[ORM\Column(type: Types::STRING, length: 64, options: ['comment' => '京东应用的AppSecret'])]
     private string $appSecret;      // 应用密钥
 
-    #[ORM\Column(type: 'string', length: 255, options: ['comment' => '京东物流API接口地址'])]
+    #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '京东物流API接口地址'])]
     private string $apiEndpoint = 'https://api.jdl.com';  // API接口地址
 
-    #[ORM\Column(type: 'string', length: 10, options: ['comment' => 'API版本号'])]
+    #[ORM\Column(type: Types::STRING, length: 10, options: ['comment' => 'API版本号'])]
     private string $version = '2.0';  // API版本号
 
-    #[ORM\Column(type: 'string', length: 10, options: ['comment' => 'API返回数据格式'])]
+    #[ORM\Column(type: Types::STRING, length: 10, options: ['comment' => 'API返回数据格式'])]
     private string $format = 'json';  // 返回格式
 
-    #[ORM\Column(type: 'string', length: 10, options: ['comment' => 'API签名方法'])]
+    #[ORM\Column(type: Types::STRING, length: 10, options: ['comment' => 'API签名方法'])]
     private string $signMethod = 'md5';  // 签名方法
 
-    #[ORM\Column(type: 'text', nullable: true, options: ['comment' => '配置备注信息'])]
+    #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '配置备注信息'])]
     private ?string $remark = null;  // 备注信息
 
-    #[ORM\Column(type: 'string', length: 255, options: ['comment' => 'OAuth2授权回调地址'])]
+    #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => 'OAuth2授权回调地址'])]
     private string $redirectUri;
 
     public function getId(): ?string
@@ -70,29 +63,6 @@ class JdlConfig
         return $this->id;
     }
 
-    public function setCreatedBy(?string $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setUpdatedBy(?string $updatedBy): self
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
-    }
 
     public function isValid(): ?bool
     {
@@ -212,5 +182,10 @@ class JdlConfig
         $this->redirectUri = $redirectUri;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->customerCode;
     }
 }

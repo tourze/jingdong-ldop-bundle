@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 class JdlAccessTokenRepositoryTest extends TestCase
 {
     private JdlAccessTokenRepository $repository;
-    private MockObject $registryMock;
+    private MockObject&ManagerRegistry $registryMock;
 
     protected function setUp(): void
     {

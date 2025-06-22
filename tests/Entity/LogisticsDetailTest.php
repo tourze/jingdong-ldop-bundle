@@ -41,7 +41,7 @@ class LogisticsDetailTest extends TestCase
         // 测试字符串日期输入
         $dateString = '2023-01-01 12:00:00';
         $this->logisticsDetail->setOperateTime($dateString);
-        $this->assertInstanceOf(\DateTime::class, $this->logisticsDetail->getOperateTime());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $this->logisticsDetail->getOperateTime());
         $this->assertEquals($dateString, $this->logisticsDetail->getOperateTime()->format('Y-m-d H:i:s'));
     }
 

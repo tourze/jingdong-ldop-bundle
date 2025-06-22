@@ -9,8 +9,8 @@ use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 
 #[ORM\Entity(repositoryClass: JdlAccessTokenRepository::class)]
-#[ORM\Table(name: 'jdl_access_token')]
-class JdlAccessToken
+#[ORM\Table(name: 'jdl_access_token', options: ['comment' => '京东物流访问令牌表'])]
+class JdlAccessToken implements \Stringable
 {
     use TimestampableAware;
 
@@ -20,17 +20,17 @@ class JdlAccessToken
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
     private ?string $id = null;
 
-    #[ORM\Column(type: 'string', length: 32, options: ['comment' => 'access_token'])]
+    #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => 'access_token'])]
     private string $accessToken;
 
-    #[ORM\Column(type: 'string', length: 32, options: ['comment' => 'refresh_token'])]
+    #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => 'refresh_token'])]
     private string $refreshToken;
 
-    #[ORM\Column(type: 'string', length: 64, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 64, nullable: true, options: ['comment' => 'scope范围'])]
     private ?string $scope = '';
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, length: 100, nullable: true, options: ['comment' => '过期时间'])]
-    private ?\DateTimeInterface $expireTime = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '过期时间'])]
+    private ?\DateTimeImmutable $expireTime = null;
 
     public function getId(): ?string
     {
@@ -73,15 +73,20 @@ class JdlAccessToken
         return $this;
     }
 
-    public function getExpireTime(): ?\DateTimeInterface
+    public function getExpireTime(): ?\DateTimeImmutable
     {
         return $this->expireTime;
     }
 
-    public function setExpireTime(?\DateTimeInterface $expireTime): static
+    public function setExpireTime(?\DateTimeImmutable $expireTime): static
     {
         $this->expireTime = $expireTime;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->accessToken;
     }
 }

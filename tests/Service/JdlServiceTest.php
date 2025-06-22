@@ -36,10 +36,10 @@ class TestPickupOrder extends PickupOrder
 class JdlServiceTest extends TestCase
 {
     private JdlService $jdlService;
-    private MockObject $httpClientMock;
-    private MockObject $configRepositoryMock;
-    private MockObject $logisticsDetailRepositoryMock;
-    private MockObject $entityManagerMock;
+    private MockObject&JdlHttpClient $httpClientMock;
+    private MockObject&JdlConfigRepository $configRepositoryMock;
+    private MockObject&LogisticsDetailRepository $logisticsDetailRepositoryMock;
+    private MockObject&EntityManagerInterface $entityManagerMock;
     private JdlConfig $mockConfig;
 
     protected function setUp(): void
@@ -347,31 +347,6 @@ class JdlServiceTest extends TestCase
         $this->assertEmpty($result);
     }
     
-    /**
-     * 测试私有方法mapWaybillStatus的映射逻辑
-     */
-    public function testMapWaybillStatus_withValidCodes_returnsCorrectStatus()
-    {
-        $reflectionMethod = new \ReflectionMethod(JdlService::class, 'mapWaybillStatus');
-        $reflectionMethod->setAccessible(true);
-        
-        $statusMap = [
-            '1' => 'STATUS_COLLECTED',
-            '2' => 'STATUS_IN_TRANSIT',
-            '3' => 'STATUS_DELIVERING',
-            '4' => 'STATUS_DELIVERED',
-            '6' => 'STATUS_REJECTED',
-            '7' => 'STATUS_DELIVERING',
-            '8' => 'STATUS_IN_TRANSIT',
-            '9' => 'STATUS_CREATED',
-            'unknown' => 'STATUS_EXCEPTION',
-        ];
-        
-        foreach ($statusMap as $code => $expectedStatus) {
-            $result = $reflectionMethod->invoke($this->jdlService, $code);
-            $this->assertSame($expectedStatus, $result->name);
-        }
-    }
     
     private function createPickupOrderMock(): PickupOrder
     {

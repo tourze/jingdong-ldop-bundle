@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 class LogisticsDetailRepositoryTest extends TestCase
 {
     private LogisticsDetailRepository $repository;
-    private MockObject $registryMock;
+    private MockObject&ManagerRegistry $registryMock;
 
     protected function setUp(): void
     {

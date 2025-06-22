@@ -40,7 +40,7 @@ class JdlAccessTokenTest extends TestCase
     
     public function testGetSetExpireTime()
     {
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->accessToken->setExpireTime($now);
         $this->assertSame($now, $this->accessToken->getExpireTime());
         

@@ -5,7 +5,6 @@ namespace JingdongLdopBundle\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use JingdongLdopBundle\Entity\LogisticsDetail;
 use JingdongLdopBundle\Entity\PickupOrder;
-use JingdongLdopBundle\Enum\JdLogisticsStatus;
 use JingdongLdopBundle\Enum\JdPickupOrderStatus;
 use JingdongLdopBundle\Repository\JdlConfigRepository;
 use JingdongLdopBundle\Repository\LogisticsDetailRepository;
@@ -165,18 +164,18 @@ class JdlService
                 // 检查是否已存在相同的物流信息
                 $exists = $this->logisticsDetailRepository->findOneBy([
                     'waybillCode' => $waybillCode,
-                    'operateTime' => new \DateTime($trace['operateTime']),
+                    'operateTime' => new \DateTimeImmutable($trace['operateTime']),
                     'operateType' => $trace['operateType'],
                 ]);
 
-                if ($exists) {
+                if ($exists !== null) {
                     continue; // 跳过已存在的记录
                 }
 
                 $detail = new LogisticsDetail();
                 $detail->setWaybillCode($waybillCode)
                     ->setCustomerCode($pickupOrder->getConfig()->getCustomerCode())
-                    ->setOrderCode($pickupOrder->getOrderCode())
+                    ->setOrderCode($pickupOrder->getId() ?? 'unknown')
                     ->setOperateTime($trace['operateTime'] ?? '')
                     ->setOperateRemark($trace['operateRemark'] ?? '')
                     ->setOperateSite($trace['operatePlace'] ?? '')
@@ -196,21 +195,4 @@ class JdlService
         }
     }
 
-    /**
-     * 映射京东物流状态到系统状态
-     */
-    private function mapWaybillStatus(string $msgCode): JdLogisticsStatus
-    {
-        return match ($msgCode) {
-            '1' => JdLogisticsStatus::STATUS_COLLECTED,  // 揽收成功
-            '2' => JdLogisticsStatus::STATUS_IN_TRANSIT, // 在途
-            '3' => JdLogisticsStatus::STATUS_DELIVERING, // 派送中
-            '4' => JdLogisticsStatus::STATUS_DELIVERED,  // 签收成功
-            '6' => JdLogisticsStatus::STATUS_REJECTED,   // 退回件
-            '7' => JdLogisticsStatus::STATUS_DELIVERING, // 分派中
-            '8' => JdLogisticsStatus::STATUS_IN_TRANSIT, // 疑难件退回中
-            '9' => JdLogisticsStatus::STATUS_CREATED,    // 待揽收
-            default => JdLogisticsStatus::STATUS_EXCEPTION, // 其他状态当作异常处理
-        };
-    }
 }

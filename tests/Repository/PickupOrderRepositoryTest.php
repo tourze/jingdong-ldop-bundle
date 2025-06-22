@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 class PickupOrderRepositoryTest extends TestCase
 {
     private PickupOrderRepository $repository;
-    private MockObject $registryMock;
+    private MockObject&ManagerRegistry $registryMock;
 
     protected function setUp(): void
     {

@@ -43,6 +43,7 @@ class JingdongLdopExtensionTest extends TestCase
         
         // 验证容器包含常见参数
         $parameters = $this->container->getParameterBag()->all();
+        $this->assertIsArray($parameters);
     }
     
     /**

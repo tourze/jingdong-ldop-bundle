@@ -14,7 +14,6 @@ class JdlHttpClient
 
     private const AUTH_CODE_URL = 'https://open-oauth.jd.com/oauth2/to_login';
 
-    private const AUTH_TOKEN_URL = 'https://open-oauth.jd.com/oauth2/access_token';
 
     public function __construct(
         private readonly HttpClientInterface $client,
@@ -108,29 +107,7 @@ class JdlHttpClient
             throw new \Exception('Failed to get access token');
         }
 
-        return $token;
-
-        $config = $this->configRepository->getDefaultConfig();
-        $code = $this->getAuthCode();
-
-        $response = $this->client->request('POST', self::AUTH_TOKEN_URL, [
-            'body' => [
-                'app_key' => $config->getAppKey(),
-                'app_secret' => $config->getAppSecret(),
-                'grant_type' => 'authorization_code',
-                'code' => $code,
-            ],
-        ]);
-
-        $result = $response->toArray();
-
-        if (!isset($result['access_token'])) {
-            throw new \Exception('Failed to get access token: ' . ($result['error_description'] ?? 'Unknown error'));
-        }
-
-        $this->accessToken = $result['access_token'];
-
-        return $this->accessToken;
+        return $token->getAccessToken();
     }
 
     /**

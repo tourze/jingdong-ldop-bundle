@@ -10,15 +10,15 @@ use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
 #[ORM\Entity(repositoryClass: PickupOrderRepository::class)]
-#[ORM\Table(name: 'jdl_pickup_order')]
+#[ORM\Table(name: 'jdl_pickup_order', options: ['comment' => '京东物流取件订单表'])]
 #[ORM\Index(columns: ['pick_up_code'], name: 'idx_pick_up_code')]
-class PickupOrder
+class PickupOrder implements \Stringable
 {
     use TimestampableAware;
+    use BlameableAware;
 
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
@@ -26,13 +26,6 @@ class PickupOrder
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
     private ?string $id = null;
 
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     #[IndexColumn]
     #[TrackColumn]
@@ -43,79 +36,79 @@ class PickupOrder
     #[ORM\JoinColumn(name: 'config_id', referencedColumnName: 'id', onDelete: 'SET NULL')]
     private ?JdlConfig $config = null; // 京东物流配置（必传）
 
-    #[ORM\Column(type: 'string', length: 50, nullable: false)]
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: false, options: ['comment' => '寄件人姓名'])]
     private string $senderName;    // 寄件人姓名（必传）
 
-    #[ORM\Column(type: 'string', length: 20, nullable: false)]
+    #[ORM\Column(type: Types::STRING, length: 20, nullable: false, options: ['comment' => '寄件人手机号'])]
     private string $senderMobile;  // 寄件人手机号（必传）
 
-    #[ORM\Column(type: 'string', length: 255, nullable: false)]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: false, options: ['comment' => '寄件人地址'])]
     private string $senderAddress; // 寄件人地址（必传）
 
-    #[ORM\Column(type: 'string', length: 20, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 20, nullable: true, options: ['comment' => '寄件人邮编'])]
     private ?string $senderPostcode = null; // 寄件人邮编（非必传）
 
-    #[ORM\Column(type: 'string', length: 50, nullable: false)]
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: false, options: ['comment' => '收件人姓名'])]
     private string $receiverName;  // 收件人姓名（必传）
 
-    #[ORM\Column(type: 'string', length: 20, nullable: false)]
+    #[ORM\Column(type: Types::STRING, length: 20, nullable: false, options: ['comment' => '收件人手机号'])]
     private string $receiverMobile; // 收件人手机号（必传）
 
-    #[ORM\Column(type: 'string', length: 255, nullable: false)]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: false, options: ['comment' => '收件人地址'])]
     private string $receiverAddress; // 收件人地址（必传）
 
-    #[ORM\Column(type: 'string', length: 20, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 20, nullable: true, options: ['comment' => '收件人邮编'])]
     private ?string $receiverPostcode = null; // 收件人邮编（非必传）
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: false)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: false, options: ['comment' => '重量(kg)'])]
     private float $weight = 0.5;  // 重量(kg)（必传）
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true, options: ['comment' => '长(cm)'])]
     private ?float $length = null;  // 长(cm)（非必传）
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true, options: ['comment' => '宽(cm)'])]
     private ?float $width = null;   // 宽(cm)（非必传）
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true, options: ['comment' => '高(cm)'])]
     private ?float $height = null;  // 高(cm)（非必传）
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '备注信息'])]
     private ?string $remark = null; // 备注信息（非必传）
 
-    #[ORM\Column(type: 'string', length: 32, nullable: false)]
+    #[ORM\Column(type: Types::STRING, length: 32, nullable: false, options: ['comment' => '订单状态'])]
     private string $status = JdPickupOrderStatus::STATUS_CREATED; // 订单状态
 
-    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: true, options: ['comment' => '包裹名称'])]
     private ?string $packageName = null;     // 包裹名称（非必传）
 
-    #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '包裹数量'])]
     private ?int $packageQuantity = null;    // 包裹数量（非必传）
 
-    #[ORM\Column(type: 'string', length: 32, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '寄件人省份'])]
     private ?string $senderProvince = null;  // 寄件人省份（非必传）
 
-    #[ORM\Column(type: 'string', length: 32, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '寄件人城市'])]
     private ?string $senderCity = null;      // 寄件人城市（非必传）
 
-    #[ORM\Column(type: 'string', length: 32, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '寄件人区县'])]
     private ?string $senderCounty = null;    // 寄件人区县（非必传）
 
-    #[ORM\Column(type: 'string', length: 32, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '收件人省份'])]
     private ?string $receiverProvince = null; // 收件人省份（非必传）
 
-    #[ORM\Column(type: 'string', length: 32, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '收件人城市'])]
     private ?string $receiverCity = null;     // 收件人城市（非必传）
 
-    #[ORM\Column(type: 'string', length: 32, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '收件人区县'])]
     private ?string $receiverCounty = null;   // 收件人区县（非必传）
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTime $pickupStartTime = null; // 期望取件开始时间（非必传）
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '期望取件开始时间'])]
+    private ?\DateTimeImmutable $pickupStartTime = null; // 期望取件开始时间（非必传）
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTime $pickupEndTime = null;   // 期望取件结束时间（非必传）
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '期望取件结束时间'])]
+    private ?\DateTimeImmutable $pickupEndTime = null;   // 期望取件结束时间（非必传）
 
-    #[ORM\Column(type: 'string', length: 32, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '取件单号'])]
     private ?string $pickUpCode = null;   // 取件单号
 
     public function getId(): ?string
@@ -123,29 +116,6 @@ class PickupOrder
         return $this->id;
     }
 
-    public function setCreatedBy(?string $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setUpdatedBy(?string $updatedBy): self
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
-    }
 
     public function isValid(): ?bool
     {
@@ -436,24 +406,24 @@ class PickupOrder
         return $this;
     }
 
-    public function getPickupStartTime(): ?\DateTime
+    public function getPickupStartTime(): ?\DateTimeImmutable
     {
         return $this->pickupStartTime;
     }
 
-    public function setPickupStartTime(?\DateTime $pickupStartTime): self
+    public function setPickupStartTime(?\DateTimeImmutable $pickupStartTime): self
     {
         $this->pickupStartTime = $pickupStartTime;
 
         return $this;
     }
 
-    public function getPickupEndTime(): ?\DateTime
+    public function getPickupEndTime(): ?\DateTimeImmutable
     {
         return $this->pickupEndTime;
     }
 
-    public function setPickupEndTime(?\DateTime $pickupEndTime): self
+    public function setPickupEndTime(?\DateTimeImmutable $pickupEndTime): self
     {
         $this->pickupEndTime = $pickupEndTime;
 
@@ -470,5 +440,10 @@ class PickupOrder
         $this->pickUpCode = $pickUpCode;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->pickUpCode ?? $this->id ?? '';
     }
 }

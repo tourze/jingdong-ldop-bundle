@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 class JdlConfigRepositoryTest extends TestCase
 {
     private JdlConfigRepository $repository;
-    private MockObject $registryMock;
+    private MockObject&ManagerRegistry $registryMock;
 
     protected function setUp(): void
     {
