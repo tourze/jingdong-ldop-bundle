@@ -6,6 +6,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use JingdongLdopBundle\Entity\LogisticsDetail;
 use JingdongLdopBundle\Entity\PickupOrder;
 use JingdongLdopBundle\Enum\JdPickupOrderStatus;
+use JingdongLdopBundle\Exception\JdlConfigException;
+use JingdongLdopBundle\Exception\JdlApiException;
 use JingdongLdopBundle\Repository\JdlConfigRepository;
 use JingdongLdopBundle\Repository\LogisticsDetailRepository;
 
@@ -27,7 +29,7 @@ class JdlService
     {
         $config = $this->configRepository->getDefaultConfig();
         if (empty($config)) {
-            throw new \Exception('无可用京东配置');
+            throw new JdlConfigException('无可用京东配置');
         }
         $pickupOrder->setConfig($config);
 
@@ -60,12 +62,12 @@ class JdlService
 
             // 处理响应结果
             if (isset($response['errorMessage'])) {
-                throw new \Exception($response['errorMessage'], $response['code'] ?? 500);
+                throw new JdlApiException($response['errorMessage'], $response['code'] ?? 500);
             }
 
             $result = $response['jingdong_ldop_receive_pickuporder_receive_responce']['receivepickuporder_result'] ?? [];
             if (isset($result['code']) && '100' !== $result['code']) {
-                throw new \Exception($response['messsage'] ?? '京东下单失败');
+                throw new JdlApiException($response['messsage'] ?? '京东下单失败');
             }
 
             // 更新订单状态
@@ -80,7 +82,7 @@ class JdlService
 
             return $result;
         } catch (\Throwable $e) {
-            throw new \Exception('创建取件订单失败: ' . $e->getMessage(), $e->getCode(), $e);
+            throw new JdlApiException('创建取件订单失败: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -106,7 +108,7 @@ class JdlService
 
             // 处理响应结果
             if (isset($response['error_response'])) {
-                throw new \Exception($response['error_response']['zh_desc'] ?? '取消取件订单失败', $response['error_response']['code'] ?? 500);
+                throw new JdlApiException($response['error_response']['zh_desc'] ?? '取消取件订单失败', $response['error_response']['code'] ?? 500);
             }
 
             $result = $response['jingdong_ldop_pickup_cancel_responce'] ?? [];
@@ -120,7 +122,7 @@ class JdlService
 
             return $result;
         } catch (\Throwable $e) {
-            throw new \Exception('取消取件订单失败: ' . $e->getMessage(), $e->getCode(), $e);
+            throw new JdlApiException('取消取件订单失败: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -150,7 +152,7 @@ class JdlService
 
             // 处理响应结果
             if (isset($response['error_response'])) {
-                throw new \Exception($response['error_response']['zh_desc'] ?? '获取物流信息失败', $response['error_response']['code'] ?? 500);
+                throw new JdlApiException($response['error_response']['zh_desc'] ?? '获取物流信息失败', $response['error_response']['code'] ?? 500);
             }
 
             $result = $response['jingdong_ldop_receive_trace_get_response'] ?? [];
@@ -191,7 +193,7 @@ class JdlService
 
             return $logisticsDetails;
         } catch (\Throwable $e) {
-            throw new \Exception('获取物流信息失败: ' . $e->getMessage(), $e->getCode(), $e);
+            throw new JdlApiException('获取物流信息失败: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 

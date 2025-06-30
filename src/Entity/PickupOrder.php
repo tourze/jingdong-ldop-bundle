@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use JingdongLdopBundle\Enum\JdPickupOrderStatus;
 use JingdongLdopBundle\Repository\PickupOrderRepository;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
-use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
+use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
@@ -19,12 +19,7 @@ class PickupOrder implements \Stringable
 {
     use TimestampableAware;
     use BlameableAware;
-
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
-    #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
-    private ?string $id = null;
+    use SnowflakeKeyAware;
 
 
     #[IndexColumn]
@@ -111,10 +106,6 @@ class PickupOrder implements \Stringable
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '取件单号'])]
     private ?string $pickUpCode = null;   // 取件单号
 
-    public function getId(): ?string
-    {
-        return $this->id;
-    }
 
 
     public function isValid(): ?bool

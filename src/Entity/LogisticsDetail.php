@@ -6,7 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JingdongLdopBundle\Enum\JdLogisticsStatus;
 use JingdongLdopBundle\Repository\LogisticsDetailRepository;
-use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
+use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
@@ -16,12 +16,7 @@ class LogisticsDetail implements \Stringable
 {
     use TimestampableAware;
     use BlameableAware;
-
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
-    #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
-    private ?string $id = null;
+    use SnowflakeKeyAware;
 
 
     #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => '运单号'])]
@@ -57,10 +52,6 @@ class LogisticsDetail implements \Stringable
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '下一站城市'])]
     private ?string $nextCity = null;   // 下一站城市（非必传）
 
-    public function getId(): ?string
-    {
-        return $this->id;
-    }
 
 
     // Getters and Setters

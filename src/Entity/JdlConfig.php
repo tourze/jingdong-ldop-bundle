@@ -6,7 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JingdongLdopBundle\Repository\JdlConfigRepository;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
-use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
+use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
@@ -18,12 +18,7 @@ class JdlConfig implements \Stringable
 {
     use TimestampableAware;
     use BlameableAware;
-
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
-    #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
-    private ?string $id = null;
+    use SnowflakeKeyAware;
 
 
     #[IndexColumn]
@@ -58,10 +53,6 @@ class JdlConfig implements \Stringable
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => 'OAuth2授权回调地址'])]
     private string $redirectUri;
 
-    public function getId(): ?string
-    {
-        return $this->id;
-    }
 
 
     public function isValid(): ?bool

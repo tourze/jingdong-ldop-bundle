@@ -2,6 +2,7 @@
 
 namespace JingdongLdopBundle\Service;
 
+use JingdongLdopBundle\Exception\JdlAuthException;
 use JingdongLdopBundle\Repository\JdlAccessTokenRepository;
 use JingdongLdopBundle\Repository\JdlConfigRepository;
 use Psr\Log\LoggerInterface;
@@ -48,7 +49,7 @@ class JdlHttpClient
         parse_str(parse_url($redirectUrl, PHP_URL_QUERY), $query);
 
         if (empty($query['code'])) {
-            throw new \Exception('Failed to get auth code');
+            throw new JdlAuthException('Failed to get auth code');
         }
 
         return $query['code'];
@@ -104,7 +105,7 @@ class JdlHttpClient
     {
         $token = $this->tokenRepository->find(1);
         if (empty($token)) {
-            throw new \Exception('Failed to get access token');
+            throw new JdlAuthException('Failed to get access token');
         }
 
         return $token->getAccessToken();

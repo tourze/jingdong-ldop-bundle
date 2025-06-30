@@ -5,7 +5,7 @@ namespace JingdongLdopBundle\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JingdongLdopBundle\Repository\JdlAccessTokenRepository;
-use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
+use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 
 #[ORM\Entity(repositoryClass: JdlAccessTokenRepository::class)]
@@ -13,12 +13,7 @@ use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 class JdlAccessToken implements \Stringable
 {
     use TimestampableAware;
-
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
-    #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
-    private ?string $id = null;
+    use SnowflakeKeyAware;
 
     #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => 'access_token'])]
     private string $accessToken;
@@ -32,10 +27,6 @@ class JdlAccessToken implements \Stringable
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '过期时间'])]
     private ?\DateTimeImmutable $expireTime = null;
 
-    public function getId(): ?string
-    {
-        return $this->id;
-    }
 
     public function getAccessToken(): string
     {
