@@ -1,0 +1,4 @@
+services:
+  JingdongLdopBundle\DataFixtures\:
+    resource: '../../DataFixtures'
+    tags: ['doctrine.fixture.orm']

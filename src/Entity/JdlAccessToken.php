@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JingdongLdopBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JingdongLdopBundle\Repository\JdlAccessTokenRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 
@@ -16,28 +19,31 @@ class JdlAccessToken implements \Stringable
     use SnowflakeKeyAware;
 
     #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => 'access_token'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 32)]
     private string $accessToken;
 
     #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => 'refresh_token'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 32)]
     private string $refreshToken;
 
     #[ORM\Column(type: Types::STRING, length: 64, nullable: true, options: ['comment' => 'scope范围'])]
+    #[Assert\Length(max: 64)]
     private ?string $scope = '';
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '过期时间'])]
+    #[Assert\Type(type: \DateTimeImmutable::class)]
     private ?\DateTimeImmutable $expireTime = null;
-
 
     public function getAccessToken(): string
     {
         return $this->accessToken;
     }
 
-    public function setAccessToken(string $accessToken): self
+    public function setAccessToken(string $accessToken): void
     {
         $this->accessToken = $accessToken;
-
-        return $this;
     }
 
     public function getRefreshToken(): string
@@ -45,11 +51,9 @@ class JdlAccessToken implements \Stringable
         return $this->refreshToken;
     }
 
-    public function setRefreshToken(string $refreshToken): self
+    public function setRefreshToken(string $refreshToken): void
     {
         $this->refreshToken = $refreshToken;
-
-        return $this;
     }
 
     public function getScope(): ?string
@@ -57,11 +61,9 @@ class JdlAccessToken implements \Stringable
         return $this->scope;
     }
 
-    public function setScope(?string $scope): self
+    public function setScope(?string $scope): void
     {
         $this->scope = $scope;
-
-        return $this;
     }
 
     public function getExpireTime(): ?\DateTimeImmutable
@@ -69,11 +71,9 @@ class JdlAccessToken implements \Stringable
         return $this->expireTime;
     }
 
-    public function setExpireTime(?\DateTimeImmutable $expireTime): static
+    public function setExpireTime(?\DateTimeImmutable $expireTime): void
     {
         $this->expireTime = $expireTime;
-
-        return $this;
     }
 
     public function __toString(): string

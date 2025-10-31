@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JingdongLdopBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JingdongLdopBundle\Enum\JdPickupOrderStatus;
 use JingdongLdopBundle\Repository\PickupOrderRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
@@ -14,17 +17,16 @@ use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
 #[ORM\Entity(repositoryClass: PickupOrderRepository::class)]
 #[ORM\Table(name: 'jdl_pickup_order', options: ['comment' => '京东物流取件订单表'])]
-#[ORM\Index(columns: ['pick_up_code'], name: 'idx_pick_up_code')]
 class PickupOrder implements \Stringable
 {
     use TimestampableAware;
     use BlameableAware;
     use SnowflakeKeyAware;
 
-
     #[IndexColumn]
     #[TrackColumn]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
+    #[Assert\Type(type: 'bool')]
     private ?bool $valid = false;
 
     #[ORM\ManyToOne(targetEntity: JdlConfig::class)]
@@ -32,92 +34,131 @@ class PickupOrder implements \Stringable
     private ?JdlConfig $config = null; // 京东物流配置（必传）
 
     #[ORM\Column(type: Types::STRING, length: 50, nullable: false, options: ['comment' => '寄件人姓名'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 50)]
     private string $senderName;    // 寄件人姓名（必传）
 
     #[ORM\Column(type: Types::STRING, length: 20, nullable: false, options: ['comment' => '寄件人手机号'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 20)]
+    #[Assert\Regex(pattern: '/^1[3-9]\d{9}$/', message: '手机号格式不正确')]
     private string $senderMobile;  // 寄件人手机号（必传）
 
     #[ORM\Column(type: Types::STRING, length: 255, nullable: false, options: ['comment' => '寄件人地址'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
     private string $senderAddress; // 寄件人地址（必传）
 
     #[ORM\Column(type: Types::STRING, length: 20, nullable: true, options: ['comment' => '寄件人邮编'])]
+    #[Assert\Length(max: 20)]
+    #[Assert\Regex(pattern: '/^\d{6}$/', message: '邮编格式不正确')]
     private ?string $senderPostcode = null; // 寄件人邮编（非必传）
 
     #[ORM\Column(type: Types::STRING, length: 50, nullable: false, options: ['comment' => '收件人姓名'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 50)]
     private string $receiverName;  // 收件人姓名（必传）
 
     #[ORM\Column(type: Types::STRING, length: 20, nullable: false, options: ['comment' => '收件人手机号'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 20)]
+    #[Assert\Regex(pattern: '/^1[3-9]\d{9}$/', message: '手机号格式不正确')]
     private string $receiverMobile; // 收件人手机号（必传）
 
     #[ORM\Column(type: Types::STRING, length: 255, nullable: false, options: ['comment' => '收件人地址'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
     private string $receiverAddress; // 收件人地址（必传）
 
     #[ORM\Column(type: Types::STRING, length: 20, nullable: true, options: ['comment' => '收件人邮编'])]
+    #[Assert\Length(max: 20)]
+    #[Assert\Regex(pattern: '/^\d{6}$/', message: '邮编格式不正确')]
     private ?string $receiverPostcode = null; // 收件人邮编（非必传）
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: false, options: ['comment' => '重量(kg)'])]
+    #[Assert\NotBlank]
+    #[Assert\Type(type: 'numeric')]
+    #[Assert\GreaterThan(value: 0, message: '重量必须大于0')]
     private float $weight = 0.5;  // 重量(kg)（必传）
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true, options: ['comment' => '长(cm)'])]
+    #[Assert\Type(type: 'numeric')]
+    #[Assert\GreaterThan(value: 0, message: '长度必须大于0')]
     private ?float $length = null;  // 长(cm)（非必传）
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true, options: ['comment' => '宽(cm)'])]
+    #[Assert\Type(type: 'numeric')]
+    #[Assert\GreaterThan(value: 0, message: '宽度必须大于0')]
     private ?float $width = null;   // 宽(cm)（非必传）
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true, options: ['comment' => '高(cm)'])]
+    #[Assert\Type(type: 'numeric')]
+    #[Assert\GreaterThan(value: 0, message: '高度必须大于0')]
     private ?float $height = null;  // 高(cm)（非必传）
 
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '备注信息'])]
+    #[Assert\Length(max: 65535)]
     private ?string $remark = null; // 备注信息（非必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, nullable: false, options: ['comment' => '订单状态'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 32)]
     private string $status = JdPickupOrderStatus::STATUS_CREATED; // 订单状态
 
     #[ORM\Column(type: Types::STRING, length: 50, nullable: true, options: ['comment' => '包裹名称'])]
+    #[Assert\Length(max: 50)]
     private ?string $packageName = null;     // 包裹名称（非必传）
 
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '包裹数量'])]
+    #[Assert\Type(type: 'integer')]
+    #[Assert\PositiveOrZero]
     private ?int $packageQuantity = null;    // 包裹数量（非必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '寄件人省份'])]
+    #[Assert\Length(max: 32)]
     private ?string $senderProvince = null;  // 寄件人省份（非必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '寄件人城市'])]
+    #[Assert\Length(max: 32)]
     private ?string $senderCity = null;      // 寄件人城市（非必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '寄件人区县'])]
+    #[Assert\Length(max: 32)]
     private ?string $senderCounty = null;    // 寄件人区县（非必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '收件人省份'])]
+    #[Assert\Length(max: 32)]
     private ?string $receiverProvince = null; // 收件人省份（非必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '收件人城市'])]
+    #[Assert\Length(max: 32)]
     private ?string $receiverCity = null;     // 收件人城市（非必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '收件人区县'])]
+    #[Assert\Length(max: 32)]
     private ?string $receiverCounty = null;   // 收件人区县（非必传）
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '期望取件开始时间'])]
+    #[Assert\Type(type: \DateTimeImmutable::class)]
     private ?\DateTimeImmutable $pickupStartTime = null; // 期望取件开始时间（非必传）
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '期望取件结束时间'])]
+    #[Assert\Type(type: \DateTimeImmutable::class)]
     private ?\DateTimeImmutable $pickupEndTime = null;   // 期望取件结束时间（非必传）
 
+    #[IndexColumn]
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '取件单号'])]
+    #[Assert\Length(max: 32)]
     private ?string $pickUpCode = null;   // 取件单号
-
-
 
     public function isValid(): ?bool
     {
         return $this->valid;
     }
 
-    public function setValid(?bool $valid): self
+    public function setValid(?bool $valid): void
     {
         $this->valid = $valid;
-
-        return $this;
     }
 
     // Getters and Setters
@@ -126,11 +167,9 @@ class PickupOrder implements \Stringable
         return $this->config;
     }
 
-    public function setConfig(?JdlConfig $config): self
+    public function setConfig(?JdlConfig $config): void
     {
         $this->config = $config;
-
-        return $this;
     }
 
     public function getSenderName(): string
@@ -138,11 +177,9 @@ class PickupOrder implements \Stringable
         return $this->senderName;
     }
 
-    public function setSenderName(string $senderName): self
+    public function setSenderName(string $senderName): void
     {
         $this->senderName = $senderName;
-
-        return $this;
     }
 
     public function getSenderAddress(): string
@@ -150,11 +187,9 @@ class PickupOrder implements \Stringable
         return $this->senderAddress;
     }
 
-    public function setSenderAddress(string $senderAddress): self
+    public function setSenderAddress(string $senderAddress): void
     {
         $this->senderAddress = $senderAddress;
-
-        return $this;
     }
 
     public function getSenderPostcode(): ?string
@@ -162,11 +197,9 @@ class PickupOrder implements \Stringable
         return $this->senderPostcode;
     }
 
-    public function setSenderPostcode(?string $senderPostcode): self
+    public function setSenderPostcode(?string $senderPostcode): void
     {
         $this->senderPostcode = $senderPostcode;
-
-        return $this;
     }
 
     public function getReceiverName(): string
@@ -174,11 +207,9 @@ class PickupOrder implements \Stringable
         return $this->receiverName;
     }
 
-    public function setReceiverName(string $receiverName): self
+    public function setReceiverName(string $receiverName): void
     {
         $this->receiverName = $receiverName;
-
-        return $this;
     }
 
     public function getReceiverAddress(): string
@@ -186,11 +217,9 @@ class PickupOrder implements \Stringable
         return $this->receiverAddress;
     }
 
-    public function setReceiverAddress(string $receiverAddress): self
+    public function setReceiverAddress(string $receiverAddress): void
     {
         $this->receiverAddress = $receiverAddress;
-
-        return $this;
     }
 
     public function getReceiverPostcode(): ?string
@@ -198,11 +227,9 @@ class PickupOrder implements \Stringable
         return $this->receiverPostcode;
     }
 
-    public function setReceiverPostcode(?string $receiverPostcode): self
+    public function setReceiverPostcode(?string $receiverPostcode): void
     {
         $this->receiverPostcode = $receiverPostcode;
-
-        return $this;
     }
 
     public function getWeight(): float
@@ -210,11 +237,9 @@ class PickupOrder implements \Stringable
         return $this->weight;
     }
 
-    public function setWeight(float $weight): self
+    public function setWeight(?float $weight): void
     {
-        $this->weight = $weight;
-
-        return $this;
+        $this->weight = $weight ?? 0.5;  // 如果为null，使用默认值0.5
     }
 
     public function getLength(): ?float
@@ -222,11 +247,9 @@ class PickupOrder implements \Stringable
         return $this->length;
     }
 
-    public function setLength(?float $length): self
+    public function setLength(?float $length): void
     {
         $this->length = $length;
-
-        return $this;
     }
 
     public function getWidth(): ?float
@@ -234,11 +257,9 @@ class PickupOrder implements \Stringable
         return $this->width;
     }
 
-    public function setWidth(?float $width): self
+    public function setWidth(?float $width): void
     {
         $this->width = $width;
-
-        return $this;
     }
 
     public function getHeight(): ?float
@@ -246,11 +267,9 @@ class PickupOrder implements \Stringable
         return $this->height;
     }
 
-    public function setHeight(?float $height): self
+    public function setHeight(?float $height): void
     {
         $this->height = $height;
-
-        return $this;
     }
 
     public function getRemark(): ?string
@@ -258,11 +277,9 @@ class PickupOrder implements \Stringable
         return $this->remark;
     }
 
-    public function setRemark(?string $remark): self
+    public function setRemark(?string $remark): void
     {
         $this->remark = $remark;
-
-        return $this;
     }
 
     public function getStatus(): string
@@ -270,11 +287,9 @@ class PickupOrder implements \Stringable
         return $this->status;
     }
 
-    public function setStatus(string $status): self
+    public function setStatus(string $status): void
     {
         $this->status = $status;
-
-        return $this;
     }
 
     public function getSenderMobile(): string
@@ -282,11 +297,9 @@ class PickupOrder implements \Stringable
         return $this->senderMobile;
     }
 
-    public function setSenderMobile(string $senderMobile): self
+    public function setSenderMobile(string $senderMobile): void
     {
         $this->senderMobile = $senderMobile;
-
-        return $this;
     }
 
     public function getReceiverMobile(): string
@@ -294,11 +307,9 @@ class PickupOrder implements \Stringable
         return $this->receiverMobile;
     }
 
-    public function setReceiverMobile(string $receiverMobile): self
+    public function setReceiverMobile(string $receiverMobile): void
     {
         $this->receiverMobile = $receiverMobile;
-
-        return $this;
     }
 
     public function getPackageName(): ?string
@@ -306,11 +317,9 @@ class PickupOrder implements \Stringable
         return $this->packageName;
     }
 
-    public function setPackageName(?string $packageName): self
+    public function setPackageName(?string $packageName): void
     {
         $this->packageName = $packageName;
-
-        return $this;
     }
 
     public function getPackageQuantity(): ?int
@@ -318,11 +327,9 @@ class PickupOrder implements \Stringable
         return $this->packageQuantity;
     }
 
-    public function setPackageQuantity(?int $packageQuantity): self
+    public function setPackageQuantity(?int $packageQuantity): void
     {
         $this->packageQuantity = $packageQuantity;
-
-        return $this;
     }
 
     public function getSenderProvince(): ?string
@@ -330,11 +337,9 @@ class PickupOrder implements \Stringable
         return $this->senderProvince;
     }
 
-    public function setSenderProvince(?string $senderProvince): self
+    public function setSenderProvince(?string $senderProvince): void
     {
         $this->senderProvince = $senderProvince;
-
-        return $this;
     }
 
     public function getSenderCity(): ?string
@@ -342,11 +347,9 @@ class PickupOrder implements \Stringable
         return $this->senderCity;
     }
 
-    public function setSenderCity(?string $senderCity): self
+    public function setSenderCity(?string $senderCity): void
     {
         $this->senderCity = $senderCity;
-
-        return $this;
     }
 
     public function getSenderCounty(): ?string
@@ -354,11 +357,9 @@ class PickupOrder implements \Stringable
         return $this->senderCounty;
     }
 
-    public function setSenderCounty(?string $senderCounty): self
+    public function setSenderCounty(?string $senderCounty): void
     {
         $this->senderCounty = $senderCounty;
-
-        return $this;
     }
 
     public function getReceiverProvince(): ?string
@@ -366,11 +367,9 @@ class PickupOrder implements \Stringable
         return $this->receiverProvince;
     }
 
-    public function setReceiverProvince(?string $receiverProvince): self
+    public function setReceiverProvince(?string $receiverProvince): void
     {
         $this->receiverProvince = $receiverProvince;
-
-        return $this;
     }
 
     public function getReceiverCity(): ?string
@@ -378,11 +377,9 @@ class PickupOrder implements \Stringable
         return $this->receiverCity;
     }
 
-    public function setReceiverCity(?string $receiverCity): self
+    public function setReceiverCity(?string $receiverCity): void
     {
         $this->receiverCity = $receiverCity;
-
-        return $this;
     }
 
     public function getReceiverCounty(): ?string
@@ -390,11 +387,9 @@ class PickupOrder implements \Stringable
         return $this->receiverCounty;
     }
 
-    public function setReceiverCounty(?string $receiverCounty): self
+    public function setReceiverCounty(?string $receiverCounty): void
     {
         $this->receiverCounty = $receiverCounty;
-
-        return $this;
     }
 
     public function getPickupStartTime(): ?\DateTimeImmutable
@@ -402,11 +397,9 @@ class PickupOrder implements \Stringable
         return $this->pickupStartTime;
     }
 
-    public function setPickupStartTime(?\DateTimeImmutable $pickupStartTime): self
+    public function setPickupStartTime(?\DateTimeImmutable $pickupStartTime): void
     {
         $this->pickupStartTime = $pickupStartTime;
-
-        return $this;
     }
 
     public function getPickupEndTime(): ?\DateTimeImmutable
@@ -414,11 +407,9 @@ class PickupOrder implements \Stringable
         return $this->pickupEndTime;
     }
 
-    public function setPickupEndTime(?\DateTimeImmutable $pickupEndTime): self
+    public function setPickupEndTime(?\DateTimeImmutable $pickupEndTime): void
     {
         $this->pickupEndTime = $pickupEndTime;
-
-        return $this;
     }
 
     public function getPickUpCode(): ?string
@@ -426,11 +417,9 @@ class PickupOrder implements \Stringable
         return $this->pickUpCode;
     }
 
-    public function setPickUpCode(?string $pickUpCode): self
+    public function setPickUpCode(?string $pickUpCode): void
     {
         $this->pickUpCode = $pickUpCode;
-
-        return $this;
     }
 
     public function __toString(): string

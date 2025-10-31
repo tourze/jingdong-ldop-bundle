@@ -1,9 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JingdongLdopBundle\Exception;
 
-use RuntimeException;
-
-class JdlConfigException extends RuntimeException
+class JdlConfigException extends \RuntimeException
 {
 }

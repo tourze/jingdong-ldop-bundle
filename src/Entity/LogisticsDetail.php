@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JingdongLdopBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JingdongLdopBundle\Enum\JdLogisticsStatus;
 use JingdongLdopBundle\Repository\LogisticsDetailRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
@@ -18,41 +21,57 @@ class LogisticsDetail implements \Stringable
     use BlameableAware;
     use SnowflakeKeyAware;
 
-
     #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => '运单号'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 32)]
     private string $waybillCode;    // 运单号（必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => '商家编码'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 32)]
     private string $customerCode;   // 商家编码（必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => '订单号'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 32)]
     private string $orderCode;      // 订单号（必传）
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '操作时间'])]
+    #[Assert\NotBlank]
+    #[Assert\Type(type: \DateTimeImmutable::class)]
     private \DateTimeImmutable $operateTime;  // 操作时间（必传）
 
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '操作描述'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
     private string $operateRemark;  // 操作描述（必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => '操作网点'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 32)]
     private string $operateSite;    // 操作网点（必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '操作人员'])]
+    #[Assert\Length(max: 32)]
     private ?string $operateUser = null;    // 操作人员（非必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, options: ['comment' => '操作类型'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 32)]
     private string $operateType;    // 操作类型（必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, enumType: JdLogisticsStatus::class, options: ['comment' => '运单状态'])]
+    #[Assert\NotNull]
+    #[Assert\Choice(callback: [JdLogisticsStatus::class, 'cases'])]
     private JdLogisticsStatus $waybillStatus;  // 运单状态
 
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '下一站网点'])]
+    #[Assert\Length(max: 32)]
     private ?string $nextSite = null;  // 下一站网点（非必传）
 
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true, options: ['comment' => '下一站城市'])]
+    #[Assert\Length(max: 32)]
     private ?string $nextCity = null;   // 下一站城市（非必传）
-
-
 
     // Getters and Setters
     public function getWaybillCode(): string
@@ -60,11 +79,9 @@ class LogisticsDetail implements \Stringable
         return $this->waybillCode;
     }
 
-    public function setWaybillCode(string $waybillCode): self
+    public function setWaybillCode(string $waybillCode): void
     {
         $this->waybillCode = $waybillCode;
-
-        return $this;
     }
 
     public function getCustomerCode(): string
@@ -72,11 +89,9 @@ class LogisticsDetail implements \Stringable
         return $this->customerCode;
     }
 
-    public function setCustomerCode(string $customerCode): self
+    public function setCustomerCode(string $customerCode): void
     {
         $this->customerCode = $customerCode;
-
-        return $this;
     }
 
     public function getOrderCode(): string
@@ -84,11 +99,9 @@ class LogisticsDetail implements \Stringable
         return $this->orderCode;
     }
 
-    public function setOrderCode(string $orderCode): self
+    public function setOrderCode(string $orderCode): void
     {
         $this->orderCode = $orderCode;
-
-        return $this;
     }
 
     public function getOperateTime(): \DateTimeImmutable
@@ -96,11 +109,12 @@ class LogisticsDetail implements \Stringable
         return $this->operateTime;
     }
 
-    public function setOperateTime(string $operateTime): self
+    public function setOperateTime(?\DateTimeImmutable $operateTime): void
     {
-        $this->operateTime = new \DateTimeImmutable($operateTime);
-
-        return $this;
+        if (null === $operateTime) {
+            throw new \InvalidArgumentException('操作时间不能为空');
+        }
+        $this->operateTime = $operateTime;
     }
 
     public function getOperateRemark(): string
@@ -108,11 +122,9 @@ class LogisticsDetail implements \Stringable
         return $this->operateRemark;
     }
 
-    public function setOperateRemark(string $operateRemark): self
+    public function setOperateRemark(string $operateRemark): void
     {
         $this->operateRemark = $operateRemark;
-
-        return $this;
     }
 
     public function getOperateSite(): string
@@ -120,11 +132,9 @@ class LogisticsDetail implements \Stringable
         return $this->operateSite;
     }
 
-    public function setOperateSite(string $operateSite): self
+    public function setOperateSite(string $operateSite): void
     {
         $this->operateSite = $operateSite;
-
-        return $this;
     }
 
     public function getOperateUser(): ?string
@@ -132,11 +142,9 @@ class LogisticsDetail implements \Stringable
         return $this->operateUser;
     }
 
-    public function setOperateUser(?string $operateUser): self
+    public function setOperateUser(?string $operateUser): void
     {
         $this->operateUser = $operateUser;
-
-        return $this;
     }
 
     public function getOperateType(): string
@@ -144,11 +152,9 @@ class LogisticsDetail implements \Stringable
         return $this->operateType;
     }
 
-    public function setOperateType(string $operateType): self
+    public function setOperateType(string $operateType): void
     {
         $this->operateType = $operateType;
-
-        return $this;
     }
 
     public function getWaybillStatus(): JdLogisticsStatus
@@ -156,11 +162,9 @@ class LogisticsDetail implements \Stringable
         return $this->waybillStatus;
     }
 
-    public function setWaybillStatus(JdLogisticsStatus $waybillStatus): self
+    public function setWaybillStatus(JdLogisticsStatus $waybillStatus): void
     {
         $this->waybillStatus = $waybillStatus;
-
-        return $this;
     }
 
     public function getNextSite(): ?string
@@ -168,11 +172,9 @@ class LogisticsDetail implements \Stringable
         return $this->nextSite;
     }
 
-    public function setNextSite(?string $nextSite): self
+    public function setNextSite(?string $nextSite): void
     {
         $this->nextSite = $nextSite;
-
-        return $this;
     }
 
     public function getNextCity(): ?string
@@ -180,11 +182,9 @@ class LogisticsDetail implements \Stringable
         return $this->nextCity;
     }
 
-    public function setNextCity(?string $nextCity): self
+    public function setNextCity(?string $nextCity): void
     {
         $this->nextCity = $nextCity;
-
-        return $this;
     }
 
     public function __toString(): string

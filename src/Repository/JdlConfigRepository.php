@@ -1,14 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JingdongLdopBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use JingdongLdopBundle\Entity\JdlConfig;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
 
 /**
  * @extends ServiceEntityRepository<JdlConfig>
  */
+#[Autoconfigure(public: true)]
+#[AsRepository(entityClass: JdlConfig::class)]
 class JdlConfigRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -26,7 +32,8 @@ class JdlConfigRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('c')
             ->where('c.valid = true')
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 
     public function getDefaultConfig(): ?JdlConfig
@@ -36,6 +43,23 @@ class JdlConfigRepository extends ServiceEntityRepository
             ->orderBy('c.id', 'ASC')
             ->setMaxResults(1)
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getOneOrNullResult()
+        ;
+    }
+
+    public function save(JdlConfig $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($entity);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(JdlConfig $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($entity);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

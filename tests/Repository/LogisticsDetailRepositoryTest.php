@@ -1,51 +1,86 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JingdongLdopBundle\Tests\Repository;
 
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use JingdongLdopBundle\Entity\LogisticsDetail;
+use JingdongLdopBundle\Enum\JdLogisticsStatus;
 use JingdongLdopBundle\Repository\LogisticsDetailRepository;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractRepositoryTestCase;
 
-class LogisticsDetailRepositoryTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(LogisticsDetailRepository::class)]
+#[RunTestsInSeparateProcesses]
+final class LogisticsDetailRepositoryTest extends AbstractRepositoryTestCase
 {
     private LogisticsDetailRepository $repository;
-    private MockObject&ManagerRegistry $registryMock;
 
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
-        $this->registryMock = $this->createMock(ManagerRegistry::class);
-        
-        // 构造Repository并注入模拟对象
-        $this->repository = new LogisticsDetailRepository($this->registryMock);
+        $this->repository = self::getService(LogisticsDetailRepository::class);
     }
-    
-    public function testInheritance_isServiceEntityRepository()
+
+    public function testSave(): void
     {
-        $this->assertInstanceOf(ServiceEntityRepository::class, $this->repository);
+        $detail = $this->createLogisticsDetail();
+
+        $this->repository->save($detail);
+
+        $this->assertNotNull($detail->getId());
+        $this->assertEquals('JD12345678901234567890', $detail->getWaybillCode());
     }
-    
-    public function testConstructor_passesCorrectEntityClass()
+
+    public function testSaveWithoutFlush(): void
     {
-        // 使用反射获取构造函数中使用的实体类名
-        $reflection = new \ReflectionClass(LogisticsDetailRepository::class);
-        $constructor = $reflection->getConstructor();
-        $parameters = $constructor->getParameters();
-        
-        // 确保第一个参数是 ManagerRegistry 
-        $this->assertEquals('registry', $parameters[0]->getName());
-        
-        // 读取父类构造函数的第二个参数默认值
-        $parentClass = $reflection->getParentClass();
-        $parentConstructor = $parentClass->getConstructor();
-        $parentParameters = $parentConstructor->getParameters();
-        
-        // 验证第二个参数是实体类名
-        $this->assertEquals('entityClass', $parentParameters[1]->getName());
-        
-        // 调用方法通过新的实例而不是使用现有的属性
-        $repository = new LogisticsDetailRepository($this->registryMock);
-        $this->assertInstanceOf(LogisticsDetailRepository::class, $repository);
+        $detail = $this->createLogisticsDetail();
+
+        $this->repository->save($detail, false);
+
+        $this->assertNotNull($detail->getId());
     }
-} 
+
+    public function testRemove(): void
+    {
+        $detail = $this->createLogisticsDetail();
+        $this->repository->save($detail);
+        $id = $detail->getId();
+
+        $this->repository->remove($detail);
+
+        $foundDetail = $this->repository->find($id);
+        $this->assertNull($foundDetail);
+    }
+
+    private function createLogisticsDetail(string $waybillCode = 'JD12345678901234567890'): LogisticsDetail
+    {
+        $detail = new LogisticsDetail();
+        $detail->setWaybillCode($waybillCode);
+        $detail->setCustomerCode('TEST_CUSTOMER');
+        $detail->setOrderCode('ORDER_' . uniqid());
+        $detail->setOperateTime(new \DateTimeImmutable());
+        $detail->setOperateRemark('包裹已发出');
+        $detail->setOperateSite('北京分拣中心');
+        $detail->setOperateType('发出');
+        $detail->setOperateUser('操作员001');
+        $detail->setWaybillStatus(JdLogisticsStatus::STATUS_IN_TRANSIT);
+        $detail->setNextSite('上海分拣中心');
+        $detail->setNextCity('上海市');
+
+        return $detail;
+    }
+
+    protected function createNewEntity(): object
+    {
+        return $this->createLogisticsDetail('JD_' . uniqid());
+    }
+
+    protected function getRepository(): LogisticsDetailRepository
+    {
+        return $this->repository;
+    }
+}

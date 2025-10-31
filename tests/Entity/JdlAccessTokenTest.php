@@ -1,76 +1,41 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JingdongLdopBundle\Tests\Entity;
 
 use JingdongLdopBundle\Entity\JdlAccessToken;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 
-class JdlAccessTokenTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(JdlAccessToken::class)]
+final class JdlAccessTokenTest extends AbstractEntityTestCase
 {
-    private JdlAccessToken $accessToken;
+    protected function createEntity(): object
+    {
+        return new JdlAccessToken();
+    }
 
-    protected function setUp(): void
+    /** @return iterable<string, array{string, mixed}> */
+    public static function propertiesProvider(): iterable
     {
-        $this->accessToken = new JdlAccessToken();
+        return [
+            'accessToken' => ['accessToken', 'test_token'],
+            'refreshToken' => ['refreshToken', 'refresh_token_value'],
+            'scope' => ['scope', 'read write'],
+            'expireTime' => ['expireTime', new \DateTimeImmutable()],
+            'createTime' => ['createTime', new \DateTimeImmutable()],
+            'updateTime' => ['updateTime', new \DateTimeImmutable()],
+        ];
     }
-    
-    public function testGetSetAccessToken()
-    {
-        $value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
-        $this->accessToken->setAccessToken($value);
-        $this->assertEquals($value, $this->accessToken->getAccessToken());
-    }
-    
-    public function testGetSetRefreshToken()
-    {
-        $value = 'refresh_token_value';
-        $this->accessToken->setRefreshToken($value);
-        $this->assertEquals($value, $this->accessToken->getRefreshToken());
-    }
-    
-    public function testGetSetScope()
-    {
-        $value = 'read write';
-        $this->accessToken->setScope($value);
-        $this->assertEquals($value, $this->accessToken->getScope());
-        
-        $this->accessToken->setScope(null);
-        $this->assertNull($this->accessToken->getScope());
-    }
-    
-    public function testGetSetExpireTime()
-    {
-        $now = new \DateTimeImmutable();
-        $this->accessToken->setExpireTime($now);
-        $this->assertSame($now, $this->accessToken->getExpireTime());
-        
-        $this->accessToken->setExpireTime(null);
-        $this->assertNull($this->accessToken->getExpireTime());
-    }
-    
-    public function testGetSetCreateTime()
-    {
-        $now = new \DateTimeImmutable();
-        $this->accessToken->setCreateTime($now);
-        $this->assertSame($now, $this->accessToken->getCreateTime());
-    }
-    
-    public function testGetSetUpdateTime()
-    {
-        $now = new \DateTimeImmutable();
-        $this->accessToken->setUpdateTime($now);
-        $this->assertSame($now, $this->accessToken->getUpdateTime());
-    }
-    
-    public function testGetId_initiallyNull()
-    {
-        $this->assertNull($this->accessToken->getId());
-    }
-    
-    public function testObjectStateAfterConstruction()
+
+    public function testObjectStateAfterConstruction(): void
     {
         $token = new JdlAccessToken();
-        
+
         // 必需属性应为null
         $this->assertNull($token->getCreateTime());
         $this->assertNull($token->getUpdateTime());
@@ -78,13 +43,4 @@ class JdlAccessTokenTest extends TestCase
         $this->assertEquals('', $token->getScope());
         $this->assertNull($token->getExpireTime());
     }
-    
-    public function testFluentInterface()
-    {
-        $result = $this->accessToken->setAccessToken('test_token')
-            ->setRefreshToken('refresh_token')
-            ->setScope('read');
-            
-        $this->assertSame($this->accessToken, $result);
-    }
-} 
+}

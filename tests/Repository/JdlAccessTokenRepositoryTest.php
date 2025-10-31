@@ -1,51 +1,82 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JingdongLdopBundle\Tests\Repository;
 
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use JingdongLdopBundle\Entity\JdlAccessToken;
 use JingdongLdopBundle\Repository\JdlAccessTokenRepository;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractRepositoryTestCase;
 
-class JdlAccessTokenRepositoryTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(JdlAccessTokenRepository::class)]
+#[RunTestsInSeparateProcesses]
+final class JdlAccessTokenRepositoryTest extends AbstractRepositoryTestCase
 {
     private JdlAccessTokenRepository $repository;
-    private MockObject&ManagerRegistry $registryMock;
 
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
-        $this->registryMock = $this->createMock(ManagerRegistry::class);
-        
-        // 构造Repository并注入模拟对象
-        $this->repository = new JdlAccessTokenRepository($this->registryMock);
+        $this->repository = self::getService(JdlAccessTokenRepository::class);
     }
-    
-    public function testInheritance_isServiceEntityRepository()
+
+    public function testSave(): void
     {
-        $this->assertInstanceOf(ServiceEntityRepository::class, $this->repository);
+        $token = new JdlAccessToken();
+        $token->setAccessToken('test_access_token_123');
+        $token->setRefreshToken('test_refresh_token_456');
+        $token->setScope('read write');
+        $token->setExpireTime(new \DateTimeImmutable('+1 hour'));
+
+        $this->repository->save($token);
+
+        $this->assertNotNull($token->getId());
+        $this->assertEquals('test_access_token_123', $token->getAccessToken());
     }
-    
-    public function testConstructor_passesCorrectEntityClass()
+
+    public function testSaveWithoutFlush(): void
     {
-        // 使用反射获取构造函数中使用的实体类名
-        $reflection = new \ReflectionClass(JdlAccessTokenRepository::class);
-        $constructor = $reflection->getConstructor();
-        $parameters = $constructor->getParameters();
-        
-        // 确保第一个参数是 ManagerRegistry 
-        $this->assertEquals('registry', $parameters[0]->getName());
-        
-        // 读取父类构造函数的第二个参数默认值
-        $parentClass = $reflection->getParentClass();
-        $parentConstructor = $parentClass->getConstructor();
-        $parentParameters = $parentConstructor->getParameters();
-        
-        // 验证第二个参数是实体类名
-        $this->assertEquals('entityClass', $parentParameters[1]->getName());
-        
-        // 调用方法通过新的实例而不是使用现有的属性
-        $repository = new JdlAccessTokenRepository($this->registryMock);
-        $this->assertInstanceOf(JdlAccessTokenRepository::class, $repository);
+        $token = new JdlAccessToken();
+        $token->setAccessToken('test_access_token_no_flush');
+        $token->setRefreshToken('test_refresh_token_no_flush');
+
+        $this->repository->save($token, false);
+
+        $this->assertNotNull($token->getId());
     }
-} 
+
+    public function testRemove(): void
+    {
+        $token = new JdlAccessToken();
+        $token->setAccessToken('test_access_token_remove');
+        $token->setRefreshToken('test_refresh_token_remove');
+
+        $this->repository->save($token);
+        $id = $token->getId();
+
+        $this->repository->remove($token);
+
+        $foundToken = $this->repository->find($id);
+        $this->assertNull($foundToken);
+    }
+
+    protected function createNewEntity(): object
+    {
+        $token = new JdlAccessToken();
+        $token->setAccessToken('test_' . uniqid());
+        $token->setRefreshToken('refresh_' . uniqid());
+        $token->setScope('test');
+        $token->setExpireTime(new \DateTimeImmutable('+1 hour'));
+
+        return $token;
+    }
+
+    protected function getRepository(): JdlAccessTokenRepository
+    {
+        return $this->repository;
+    }
+}

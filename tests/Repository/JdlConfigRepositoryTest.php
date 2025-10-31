@@ -1,51 +1,114 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JingdongLdopBundle\Tests\Repository;
 
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use JingdongLdopBundle\Entity\JdlConfig;
 use JingdongLdopBundle\Repository\JdlConfigRepository;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractRepositoryTestCase;
 
-class JdlConfigRepositoryTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(JdlConfigRepository::class)]
+#[RunTestsInSeparateProcesses]
+final class JdlConfigRepositoryTest extends AbstractRepositoryTestCase
 {
     private JdlConfigRepository $repository;
-    private MockObject&ManagerRegistry $registryMock;
 
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
-        $this->registryMock = $this->createMock(ManagerRegistry::class);
-        
-        // 构造Repository并注入模拟对象
-        $this->repository = new JdlConfigRepository($this->registryMock);
+        $this->repository = self::getService(JdlConfigRepository::class);
     }
-    
-    public function testInheritance_isServiceEntityRepository()
+
+    public function testFindAllValid(): void
     {
-        $this->assertInstanceOf(ServiceEntityRepository::class, $this->repository);
+        $result = $this->repository->findAllValid();
+        $this->assertIsArray($result);
     }
-    
-    public function testConstructor_passesCorrectEntityClass()
+
+    public function testGetDefaultConfig(): void
     {
-        // 使用反射获取构造函数中使用的实体类名
-        $reflection = new \ReflectionClass(JdlConfigRepository::class);
-        $constructor = $reflection->getConstructor();
-        $parameters = $constructor->getParameters();
-        
-        // 确保第一个参数是 ManagerRegistry 
-        $this->assertEquals('registry', $parameters[0]->getName());
-        
-        // 读取父类构造函数的第二个参数默认值
-        $parentClass = $reflection->getParentClass();
-        $parentConstructor = $parentClass->getConstructor();
-        $parentParameters = $parentConstructor->getParameters();
-        
-        // 验证第二个参数是实体类名
-        $this->assertEquals('entityClass', $parentParameters[1]->getName());
-        
-        // 调用方法通过新的实例而不是使用现有的属性
-        $repository = new JdlConfigRepository($this->registryMock);
-        $this->assertInstanceOf(JdlConfigRepository::class, $repository);
+        $config = $this->createConfig('TEST001', true);
+        $this->repository->save($config);
+
+        $defaultConfig = $this->repository->getDefaultConfig();
+        $this->assertInstanceOf(JdlConfig::class, $defaultConfig);
+        $this->assertTrue($defaultConfig->isValid());
     }
-} 
+
+    public function testGetDefaultConfigWhenNoValidConfigExists(): void
+    {
+        $validConfigs = $this->repository->findAllValid();
+        foreach ($validConfigs as $validConfig) {
+            $validConfig->setValid(false);
+            $this->repository->save($validConfig);
+        }
+
+        $config = $this->createConfig('TEST002', false);
+        $this->repository->save($config);
+
+        $defaultConfig = $this->repository->getDefaultConfig();
+        $this->assertNull($defaultConfig);
+    }
+
+    public function testSave(): void
+    {
+        $config = $this->createConfig('SAVE_TEST', true);
+
+        $this->repository->save($config);
+
+        $this->assertNotNull($config->getId());
+        $this->assertEquals('SAVE_TEST', $config->getCustomerCode());
+    }
+
+    public function testSaveWithoutFlush(): void
+    {
+        $config = $this->createConfig('SAVE_NO_FLUSH', true);
+
+        $this->repository->save($config, false);
+
+        $this->assertNotNull($config->getId());
+    }
+
+    public function testRemove(): void
+    {
+        $config = $this->createConfig('REMOVE_TEST', true);
+        $this->repository->save($config);
+        $id = $config->getId();
+
+        $this->repository->remove($config);
+
+        $foundConfig = $this->repository->find($id);
+        $this->assertNull($foundConfig);
+    }
+
+    private function createConfig(string $customerCode, bool $valid): JdlConfig
+    {
+        $config = new JdlConfig();
+        $config->setCustomerCode($customerCode);
+        $config->setAppKey('test_app_key_' . $customerCode);
+        $config->setAppSecret('test_app_secret_' . $customerCode);
+        $config->setApiEndpoint('https://api.jdl.com');
+        $config->setVersion('2.0');
+        $config->setFormat('json');
+        $config->setSignMethod('md5');
+        $config->setRedirectUri('https://example.com/callback');
+        $config->setValid($valid);
+
+        return $config;
+    }
+
+    protected function createNewEntity(): object
+    {
+        return $this->createConfig('test_' . uniqid(), true);
+    }
+
+    protected function getRepository(): JdlConfigRepository
+    {
+        return $this->repository;
+    }
+}

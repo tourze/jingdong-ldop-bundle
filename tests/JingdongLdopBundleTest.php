@@ -1,20 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JingdongLdopBundle\Tests;
 
-use HttpClientBundle\HttpClientBundle;
 use JingdongLdopBundle\JingdongLdopBundle;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractBundleTestCase;
 
-class JingdongLdopBundleTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(JingdongLdopBundle::class)]
+#[RunTestsInSeparateProcesses]
+final class JingdongLdopBundleTest extends AbstractBundleTestCase
 {
-    public function testGetBundleDependencies()
-    {
-        // 验证依赖是否正确
-        $dependencies = JingdongLdopBundle::getBundleDependencies();
-        
-        $this->assertNotEmpty($dependencies);
-        $this->assertArrayHasKey(HttpClientBundle::class, $dependencies);
-        $this->assertEquals(['all' => true], $dependencies[HttpClientBundle::class]);
-    }
-} 
+}
