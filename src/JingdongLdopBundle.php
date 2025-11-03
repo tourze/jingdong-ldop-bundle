@@ -8,6 +8,7 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use HttpClientBundle\HttpClientBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Tourze\BundleDependency\BundleDependencyInterface;
+use Tourze\EasyAdminMenuBundle\EasyAdminMenuBundle;
 
 class JingdongLdopBundle extends Bundle implements BundleDependencyInterface
 {
@@ -16,6 +17,7 @@ class JingdongLdopBundle extends Bundle implements BundleDependencyInterface
         return [
             HttpClientBundle::class => ['all' => true],
             DoctrineBundle::class => ['all' => true],
+            EasyAdminMenuBundle::class => ['all' => true],
         ];
     }
 }
