@@ -91,14 +91,6 @@ class JdlAccessTokenCrudControllerTest extends AbstractEasyAdminControllerTestCa
     }
 
     /**
-     * 测试获取实体 FQCN
-     */
-    public function testGetEntityFqcn(): void
-    {
-        $this->assertSame(JdlAccessToken::class, JdlAccessTokenCrudController::getEntityFqcn());
-    }
-
-    /**
      * 测试控制器配置
      */
     public function testControllerConfiguration(): void

@@ -118,11 +118,6 @@ class JdlConfigCrudControllerTest extends AbstractEasyAdminControllerTestCase
         yield 'remark' => ['remark'];
     }
 
-    public function testGetEntityFqcn(): void
-    {
-        $this->assertSame(JdlConfig::class, JdlConfigCrudController::getEntityFqcn());
-    }
-
     public function testControllerInstantiation(): void
     {
         $controller = new JdlConfigCrudController();

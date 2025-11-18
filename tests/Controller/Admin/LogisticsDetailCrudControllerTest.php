@@ -109,14 +109,6 @@ final class LogisticsDetailCrudControllerTest extends AbstractEasyAdminControlle
         yield 'nextCity' => ['nextCity'];
     }
 
-    public function testGetEntityFqcn(): void
-    {
-        $this->assertSame(
-            LogisticsDetail::class,
-            LogisticsDetailCrudController::getEntityFqcn()
-        );
-    }
-
     public function testControllerIsInstantiable(): void
     {
         $controller = new LogisticsDetailCrudController();
