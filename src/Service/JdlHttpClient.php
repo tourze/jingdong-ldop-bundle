@@ -12,7 +12,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[WithMonologChannel(channel: 'jingdong_ldop')]
-class JdlHttpClient
+final class JdlHttpClient
 {
     // 京东 API 相关地址
     private const API_URL = 'https://api.jd.com/routerjson';

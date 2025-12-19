@@ -13,6 +13,7 @@ use PHPUnit\Framework\Constraint\LogicalOr;
 use PHPUnit\Framework\Constraint\StringContains;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Tourze\PHPUnitSymfonyWebTest\AbstractEasyAdminControllerTestCase;
+use Tourze\UserServiceContracts\UserManagerInterface;
 
 /**
  * 京东物流详情CRUD控制器测试
@@ -28,33 +29,28 @@ final class LogisticsDetailCrudControllerTest extends AbstractEasyAdminControlle
     }
 
     /**
-     * 修复基类中客户端初始化问题
-     * 创建工作正常的认证客户端，绕过有问题的基类方法
+     * 创建具有正确权限的管理员用户
+     * 在需要权限的测试方法开始时调用
      */
-    protected function createWorkingAuthenticatedClient(): KernelBrowser
+    private function createAdminUserIfNeeded(): void
     {
-        // 如果内核没有启动，启动它
-        if (!self::$booted) {
-            $kernel = self::bootKernel();
+        $userManager = self::getService(UserManagerInterface::class);
+
+        // 尝试查找已存在的用户
+        $existingUser = $userManager->loadUserByIdentifier('admin');
+        if ($existingUser === null) {
+            // 创建新的管理员用户
+            $adminUser = $userManager->createUser(
+                userIdentifier: 'admin',
+                password: 'password',
+                roles: ['ROLE_ADMIN']
+            );
+
+            // 如果不是内存用户，需要保存到数据库
+            if (!method_exists($adminUser, 'getUserIdentifier') || $adminUser->getUserIdentifier() !== 'admin') {
+                $userManager->saveUser($adminUser);
+            }
         }
-
-        // 从容器获取客户端
-        $client = self::getContainer()->get('test.client');
-        if (!$client instanceof KernelBrowser) {
-            throw new \RuntimeException('无法创建功能测试客户端，请确保 "framework.test" 配置设置为 true');
-        }
-
-        $client->catchExceptions(false);
-
-        // 初始化数据库
-        if (self::hasDoctrineSupport()) {
-            self::cleanDatabase();
-        }
-
-        $this->createAdminUser('admin@test.com', 'password123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'password123');
-
-        return $client;
     }
 
     /**
@@ -120,7 +116,10 @@ final class LogisticsDetailCrudControllerTest extends AbstractEasyAdminControlle
      */
     public function testValidationErrors(): void
     {
-        $client = $this->createWorkingAuthenticatedClient();
+        // 确保管理员用户存在
+        $this->createAdminUserIfNeeded();
+
+        $client = $this->createAuthenticatedClient();
 
         // 访问新建页面
         $crawler = $client->request('GET', $this->generateAdminUrl('new'));
@@ -191,7 +190,10 @@ final class LogisticsDetailCrudControllerTest extends AbstractEasyAdminControlle
      */
     public function testDateTimeValidation(): void
     {
-        $client = $this->createWorkingAuthenticatedClient();
+        // 确保管理员用户存在
+        $this->createAdminUserIfNeeded();
+
+        $client = $this->createAuthenticatedClient();
 
         // 访问新建页面
         $crawler = $client->request('GET', $this->generateAdminUrl('new'));
@@ -246,7 +248,10 @@ final class LogisticsDetailCrudControllerTest extends AbstractEasyAdminControlle
      */
     public function testFieldLengthValidation(): void
     {
-        $client = $this->createWorkingAuthenticatedClient();
+        // 确保管理员用户存在
+        $this->createAdminUserIfNeeded();
+
+        $client = $this->createAuthenticatedClient();
 
         // 访问新建页面
         $crawler = $client->request('GET', $this->generateAdminUrl('new'));

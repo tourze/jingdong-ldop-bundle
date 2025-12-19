@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 
 #[Autoconfigure(public: true)]
 #[WithMonologChannel(channel: 'jingdong_ldop')]
-readonly class JdlService
+final readonly class JdlService
 {
     public function __construct(
         private JdlHttpClient $httpClient,

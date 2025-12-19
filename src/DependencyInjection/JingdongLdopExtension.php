@@ -6,7 +6,7 @@ namespace JingdongLdopBundle\DependencyInjection;
 
 use Tourze\SymfonyDependencyServiceLoader\AutoExtension;
 
-class JingdongLdopExtension extends AutoExtension
+final class JingdongLdopExtension extends AutoExtension
 {
     protected function getConfigDir(): string
     {

@@ -7,6 +7,6 @@ namespace JingdongLdopBundle\Exception;
 /**
  * JingdongLdopBundle 业务异常
  */
-class JingdongLdopBundleException extends \RuntimeException
+final class JingdongLdopBundleException extends \RuntimeException
 {
 }

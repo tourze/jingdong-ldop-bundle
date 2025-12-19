@@ -11,7 +11,7 @@ use JingdongLdopBundle\Entity\JdlConfig;
 use JingdongLdopBundle\Entity\PickupOrder;
 use JingdongLdopBundle\Enum\JdPickupOrderStatus;
 
-class PickupOrderFixtures extends Fixture implements DependentFixtureInterface
+final class PickupOrderFixtures extends Fixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {

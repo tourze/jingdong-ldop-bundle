@@ -9,7 +9,7 @@ use Doctrine\Persistence\ObjectManager;
 use JingdongLdopBundle\Entity\LogisticsDetail;
 use JingdongLdopBundle\Enum\JdLogisticsStatus;
 
-class LogisticsDetailFixtures extends Fixture
+final class LogisticsDetailFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {

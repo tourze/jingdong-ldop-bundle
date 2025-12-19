@@ -8,7 +8,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use JingdongLdopBundle\Entity\JdlConfig;
 
-class JdlConfigFixtures extends Fixture
+final class JdlConfigFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
